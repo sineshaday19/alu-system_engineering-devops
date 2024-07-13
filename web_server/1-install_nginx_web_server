@@ -1,17 +1,39 @@
 #!/usr/bin/env bash
-# installing and config nginx
 
+# Update the package list
 apt-get update
+
+# Install Nginx if it is not already installed
 apt-get -y install nginx
 
-# adding an html page
+# Create an HTML page with the required content
 echo "Holberton School" > /var/www/html/index.html
 
-# checking if service is running
-state=$(pgrep nginx)
-if [ -n "$state" ];
+# Ensure Nginx is running and accepting traffic on port 80
+service nginx start
+service nginx enable
+
+# Check if the service is running
+if pgrep nginx > /dev/null
 then
-	sudo service nginx start
+    echo "Nginx is running"
 else
-	sudo service nginx restart
+    echo "Starting Nginx"
+    service nginx start
 fi
+
+# Ensure Nginx is listening on port 80
+if ! sudo netstat -tulnp | grep :80 > /dev/null
+then
+    echo "Nginx is not listening on port 80. Restarting Nginx."
+    service nginx restart
+fi
+
+# Check if the server returns 200 when querying /
+if curl -s -o /dev/null -w "%{http_code}" http://localhost | grep 200 > /dev/null
+then
+    echo "Nginx is correctly serving the page."
+else
+    echo "Nginx is not correctly serving the page. Check the configuration."
+fi
+
