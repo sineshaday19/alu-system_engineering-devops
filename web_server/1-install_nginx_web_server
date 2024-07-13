@@ -1,22 +1,17 @@
 #!/usr/bin/env bash
-# install nginx and config
-# update package list
-sudo apt-get update || { echo "Failed to update package list"; exit 1; }
-# install nginx
-sudo apt-get install -y nginx || { echo "Failed to install Nginx"; exit 1; }
-# run it
-sudo service nginx start || { echo "Failed to start Nginx"; exit 1; }
-# create a custom HTML page
-echo "Holberton School" | sudo tee /var/www/html/index.html > /dev/null
-# configure nginx (port 80)
-sudo sed -i '/listen 80 default_server/ s/80 default_server/80 default_server ipv6only=on/' /etc/nginx/sites-available/default || { echo "Failed to configure Nginx"; exit 1; }
-# restart nginx
-sudo service nginx restart || { echo "Failed to restart Nginx"; exit 1; }
-sleep 2
-# if it returns the expectation
-curl_output=$(curl -s http://localhost)
-if [[ "$curl_output" == *"Holberton School"* ]]; then
-    echo "Nginx configured successfully!"
+# installing and config nginx
+
+apt-get update
+apt-get -y install nginx
+
+# adding an html page
+echo "Holberton School" > /var/www/html/index.html
+
+# checking if service is running
+state=$(pgrep nginx)
+if [ -n "$state" ];
+then
+	sudo service nginx start
 else
-    echo "Nginx configuration check failed."
+	sudo service nginx restart
 fi
