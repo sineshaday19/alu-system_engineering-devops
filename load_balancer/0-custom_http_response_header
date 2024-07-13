@@ -1,15 +1,49 @@
 #!/usr/bin/env bash
-# Configure Nginx so that its HTTP response contains a custom header
-# The name of the custom HTTP header must be `X-Served-By`
-# The value of the custom HTTP header must be the `hostname` of the server Nginx is running on
+# installing and config nginx
 
-sudo apt-get update
-sudo apt-get -y install nginx
-sudo ufw enable
-sudo ufw allow 'Nginx HTTP'
-sudo ufw allow 'OpenSSH'
-echo 'Hello World!' |sudo tee /var/www/html/index.html
+apt-get update
+apt-get -y install nginx
 
-custom_header="server_name _;\n\tadd_header X-Served-By \$HOSTNAME;"
-sudo sed -i "s|server_name _;|$custom_header|" /etc/nginx/sites-enabled/default
-sudo service nginx restart
+# adding a html page
+echo "Holberton School" > /var/www/html/index.html
+echo "Ceci n'est pas une page" > /usr/share/nginx/html/custom_404.html
+
+CONFIG=\
+"server {
+	listen 80 default_server;
+  	listen [::]:80 default_server;
+
+        root /var/www/html;
+
+        index index.html index.htm index.nginx-debian.html;
+
+	error_page 404 /custom_404.html;
+
+	server_name _;
+
+	rewrite ^/redirect_me(.*)$ http://www.google.com/ permanent;
+
+	location = /custom_404.html {
+		root /usr/share/nginx/html;
+		internal;
+	}
+
+        location / {
+                try_files \$uri \$uri/ =404;
+	}
+	add_header X-Served-By \$hostname;
+}"
+
+echo -e "$CONFIG" > /etc/nginx/sites-enabled/default
+
+# checking if service is running
+state=$(pgrep nginx)
+if [ -n "$state" ];
+then
+	sudo service nginx restart
+	echo "resarting Nginx...."
+else
+	sudo service nginx start
+	echo "Ngix started.."
+fi
+echo "done"
