@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# This script installs and configures Nginx, creates a web page that displays "Holberton School", and ensures the server is running correctly.
 
 # Update the package list
 apt-get update
@@ -36,4 +37,3 @@ then
 else
     echo "Nginx is not correctly serving the page. Check the configuration."
 fi
-
