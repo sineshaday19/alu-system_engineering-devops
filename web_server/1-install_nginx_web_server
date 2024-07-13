@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
-#Installing Nginx on Ubuntugit puh
-#Nginx is listening on port 80
-#The GET request should return a page containing "Holberton School"
+# installing and config nginx
 
-sudo apt-get update && upgrade
-sudo apt-get install nginx -y
+apt-get update
+apt-get -y install nginx
 
-sudo chown -R "$USER":"$USER" /var/www/html
-sudo chmod -R 755 /var/www
+# adding an html page
+echo "Holberton School" > /var/www/html/index.html
 
-#Create a directory called html inside your nginx server
-sudo mkdir /var/www/html
-#Create a file inside that directory called index.html
-sudo touch /var/www/html/index.html
-#Display your message then
-sudo echo "Sine" > /var/www/html/index.html
-sudo service nginx restart
+# checking if service is running
+state=$(pgrep nginx)
+if [ -n "$state" ];
+then
+	sudo service nginx start
+else
+	sudo service nginx restart
+fi
