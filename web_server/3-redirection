@@ -1,24 +1,43 @@
 #!/usr/bin/env bash
-# script that install nginx and configure it to redirect to another page when
-# accessing the /redirect_me page.
-sudo apt update -y
-sudo apt install nginx -y
+# Installing and configuring Nginx
 
-# store configuration content
-new_config=\
-"server {
-        listen 80 default_server;
-        listen [::]:80 default_server;
-               root /var/www/html;
-        index index.html index.htm index.nginx-debian.html;
-        server_name _;
-        location / {
-                try_files \$uri \$uri/ =404;
-        }
-        location /redirect_me { 
-            return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
-        }
-}
-"
-echo "$new_config" > /etc/nginx/sites-available/default
-sudo service nginx restart
+apt-get update
+apt-get -y install nginx
+
+# Adding an HTML page
+echo "Holberton School" > /var/www/html/index.html
+
+# Nginx server block configuration
+CONFIG="server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+
+    index index.html index.htm index.nginx-debian.html;
+    server_name _;
+
+    location /redirect_me {
+        return 301 http://www.google.com;
+    }
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}"
+
+# Writing the configuration to the default server block
+echo "$CONFIG" > /etc/nginx/sites-enabled/default
+
+# Restarting Nginx service if running, otherwise starting it
+if pgrep nginx > /dev/null
+then
+    sudo service nginx restart
+    echo "Restarting Nginx..."
+else
+    sudo service nginx start
+    echo "Nginx started..."
+fi
+
+echo "Done"
+
