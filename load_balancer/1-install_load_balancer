@@ -12,7 +12,7 @@ backend allServers
 	balance roundrobin
 	mode http
 	server 5821-web-01 54.163.21.212:80 check
-	server 5821-web-02 34.236.158.180:80 check
+	server 5834-web-02 34.230.75.207 check
 "
 FRONTEND_CONFIG=\
 "
