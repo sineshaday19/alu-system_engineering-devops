@@ -1,48 +1,39 @@
 #!/usr/bin/env bash
-# installing and config nginx
+# Configures a new ubuntu machine by installing
+# Nginx where it should be listening on port 80
+# Serve a page that would return a Hello World string
+#
 
-apt-get update
-apt-get -y install nginx
+echo -e "Updating and installing Nginx.\n"
+sudo apt-get update -y -qq && \
+	 sudo apt-get install nginx -y
 
-# adding a html page
-echo "Holberton School" > /var/www/html/index.html
-echo "Ceci n'est pas une page" > /usr/share/nginx/html/custom_404.html
+echo -e "\nSetting up some minor stuff.\n"
 
-CONFIG=\
-"server {
-	listen 80 default_server;
-  	listen [::]:80 default_server;
+# starting nginx service
+sudo service nginx start
 
-        root /var/www/html;
+# allowing nginx on firewall
+sudo ufw allow 'Nginx HTTP'
 
-        index index.html index.htm index.nginx-debian.html;
+# Give the user ownership to website files for easy editing
+sudo chown -R "$USER":"$USER" /var/www/html
+sudo chmod -R 755 /var/www
 
-	error_page 404 /custom_404.html;
+# Backup default index
+cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.bckp
 
-	server_name _;
+# Creating new index
+echo -e "Hello World!" > /var/www/html/index.nginx-debian.html
 
-	rewrite ^/redirect_me(.*)$ http://www.google.com/ permanent;
+# Setting up /redirect_me to a youtube video
+sudo sed -i '24i\	rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;' /etc/nginx/sites-available/default
 
-	location = /custom_404.html {
-		root /usr/share/nginx/html;
-		internal;
-	}
+# Set up a 404 page
+echo "Ceci n'est pas une page" >> /var/www/html/error_404.html
+sudo sed -i '25i\	error_page 404 /error_404.html;' /etc/nginx/sites-available/default
 
-        location / {
-                try_files \$uri \$uri/ =404;
-	}
-}"
+# Restarting nginx
+sudo service nginx restart
 
-echo -e "$CONFIG" > /etc/nginx/sites-enabled/default
-
-# checking if service is running
-state=$(pgrep nginx)
-if [ -n "$state" ];
-then
-	sudo service nginx restart
-	echo "resarting Nginx...."
-else
-	sudo service nginx start
-	echo "Ngix started.."
-fi
-echo "done"
+echo -e "\nCompleted.\n"
